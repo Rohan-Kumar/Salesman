@@ -9,15 +9,14 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,11 +51,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     EditText password;
     TextView status;
     Button signInButton, signOutButton;
-    String Response="";
+    String Response = "";
     SharedPreferences preferences;
     SharedPreferences.Editor editor;
     static LocationRequest locationRequest;
     static GoogleApiClient googleApiClient;
+    boolean isSet = false;
 
 
     @Override
@@ -95,8 +95,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 return;
             }
             new UserLoginTask(userId.getText().toString(), password.getText().toString()).execute();
-        }
-        else
+        } else
             Toast.makeText(LoginActivity.this, "No internet.. Please connect to internet and try again", Toast.LENGTH_SHORT).show();
     }
 
@@ -112,7 +111,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             signInButton.setVisibility(View.INVISIBLE);
             signOutButton.setVisibility(View.VISIBLE);
             status.setVisibility(View.VISIBLE);
-            status.setText(preferences.getString("time","").equals("")?"Error":"Your last login was at "+preferences.getString("time",""));
+            if (!isSet)
+                status.setText(preferences.getString("time", "").equals("") ? "Error" : "Your last login was at " + preferences.getString("time", ""));
             editor.putString("status", "logout");
         } else if (view.equals("login")) {
             userId.setText("");
@@ -277,32 +277,33 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         @Override
         protected Void doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-            authenticate(mEmail,mPassword);
+            authenticate(mEmail, mPassword);
             return null;
         }
 
         @Override
         protected void onPostExecute(final Void success) {
-            if (Response.equals("0")) {
+            if (Response.equals("wrong password")) {
                 progressDialog.dismiss();
                 password.setError("Invalid password");
                 password.requestFocus();
                 Response = "";
-            } else if (Response.equals("1")) {
+            } else if (Response.equals("no account found")) {
                 progressDialog.dismiss();
                 userId.setError("Invalid userId");
                 userId.requestFocus();
                 Response = "";
-            } else if (Response.equals("-1")) {
+            } else {
                 progressDialog.dismiss();
                 changeView("logout");
                 Calendar c = Calendar.getInstance();
                 preferences = getApplicationContext().getSharedPreferences("login", Context.MODE_PRIVATE);
                 editor = preferences.edit();
-                editor.putString("time",(c.getTime().getHours() > 12 ? (c.getTime().getHours()-12) : (c.getTime().getHours())) + "/" + c.getTime().getMinutes());
+                editor.putString("time", (c.getTime().getHours() > 12 ? (c.getTime().getHours() - 12) : (c.getTime().getHours())) + "/" + c.getTime().getMinutes());
                 editor.apply();
                 connectToApi();
                 Response = "";
+                status.setText("Last login at " + (c.getTime().getHours() > 12 ? (c.getTime().getHours() - 12) : (c.getTime().getHours())) + "/" + c.getTime().getMinutes());
             }
 
         }
@@ -312,7 +313,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     public void authenticate(String userid, String password) {
         URL url;
         try {
-            url = new URL(Constants.URL+"salesman_login.php");
+            url = new URL("http://204.152.203.111/salesman/salesman_login.php");
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 
             httpURLConnection.setDoInput(true);
@@ -320,7 +321,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             httpURLConnection.setRequestMethod("POST");
 
             Uri.Builder builder = new Uri.Builder()
-                    .appendQueryParameter("emp_id", userid)
+                    .appendQueryParameter("phnumber", userid)
                     .appendQueryParameter("password", password);
 
 
@@ -353,7 +354,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             e.printStackTrace();
         }
     }
-
 
 
 }

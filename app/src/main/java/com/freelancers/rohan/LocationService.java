@@ -21,6 +21,10 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -46,9 +50,10 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     static GoogleApiClient googleApiClient;
     Location loc;
     Timer timer;
-    String Response="";
+    String Response = "";
     SharedPreferences sharedPreferences;
-
+    JSONArray jsonArray = new JSONArray();
+    boolean isLocationSet = false;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -60,7 +65,6 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         super.onCreate();
         Toast.makeText(this, "service created", Toast.LENGTH_SHORT).show();
         connectToGoogleApi();
-
     }
 
     @Override
@@ -80,12 +84,32 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             @Override
             public void run() {
 //                sendLoc();
+                if (isLocationSet) {
+                    try {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("latitude", "" + loc.getLatitude());
+                        jsonObject.put("longitude", "" + loc.getLongitude());
+                        jsonObject.put("time", getCurrentTimeStamp());
+                        jsonArray.put(jsonObject);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, 1000, 5000);
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Log.d("json array",""+jsonArray);
+                sharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES, MODE_PRIVATE);
+                sendLoc(loc, sharedPreferences.getString(Constants.EMP_ID_PREf, "0"));
+                jsonArray = new JSONArray();
+                Log.d("json array",""+jsonArray);
             }
         }, 1000, 30000);
-
         return START_STICKY;
     }
-
 
 
     public void sendLoc(final Location location, final String salesman_id) {
@@ -96,7 +120,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
                 URL url;
                 try {
-                    url = new URL(Constants.URL+"insert_loc.php");
+                    url = new URL(Constants.URL + "insert_loc.php");
                     HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 
                     httpURLConnection.setDoInput(true);
@@ -104,10 +128,8 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
                     httpURLConnection.setRequestMethod("POST");
 
                     Uri.Builder builder = new Uri.Builder()
-                            .appendQueryParameter("lat", "" + location.getLatitude())
-                            .appendQueryParameter("lon", "" + location.getLongitude())
-                            .appendQueryParameter("time",getCurrentTimeStamp())
-                            .appendQueryParameter("salesman_id",salesman_id);
+                            .appendQueryParameter("array", "" + jsonArray)
+                            .appendQueryParameter("salesman_id", salesman_id);
 
 
                     String query = builder.build().getEncodedQuery();
@@ -189,9 +211,8 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
                     @Override
                     public void onLocationChanged(Location location) {
                         loc = location;
-                        Log.d("hello", "loc " + loc.getLatitude() +" lon "+loc.getLongitude()+" "+getCurrentTimeStamp());
-                        sharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES,MODE_PRIVATE);
-                        sendLoc(location,sharedPreferences.getString(Constants.EMP_ID_PREf,"0"));
+                        isLocationSet = true;
+                        Log.d("hello", "loc " + loc.getLatitude() + " lon " + loc.getLongitude() + " " + getCurrentTimeStamp());
                     }
                 });
     }
@@ -207,7 +228,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     }
 
-    public static String getCurrentTimeStamp(){
+    public static String getCurrentTimeStamp() {
         try {
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
