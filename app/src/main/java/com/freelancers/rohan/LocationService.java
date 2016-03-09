@@ -2,6 +2,7 @@ package com.freelancers.rohan;
 
 import android.Manifest;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -101,11 +102,10 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Log.d("json array",""+jsonArray);
+                Log.d("json array", "" + jsonArray);
                 sharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES, MODE_PRIVATE);
-                sendLoc(loc, sharedPreferences.getString(Constants.EMP_ID_PREf, "0"));
-                jsonArray = new JSONArray();
-                Log.d("json array",""+jsonArray);
+                sendLoc(loc, sharedPreferences.getString(Constants.EMP_ID_PREf, getApplicationContext().getSharedPreferences("login", Context.MODE_PRIVATE).getString("id","0")));
+                Log.d("json array", "" + jsonArray);
             }
         }, 1000, 30000);
         return START_STICKY;
@@ -115,6 +115,12 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     public void sendLoc(final Location location, final String salesman_id) {
 
         new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                jsonArray = new JSONArray();
+            }
+
             @Override
             protected Void doInBackground(Void... params) {
 
@@ -133,6 +139,8 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
 
                     String query = builder.build().getEncodedQuery();
+
+                    Log.d("test", query);
 
                     OutputStream os = httpURLConnection.getOutputStream();
 
@@ -160,7 +168,6 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
                 Response = "";
                 return null;
             }

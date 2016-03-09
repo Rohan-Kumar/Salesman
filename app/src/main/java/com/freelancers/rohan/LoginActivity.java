@@ -299,6 +299,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 Calendar c = Calendar.getInstance();
                 preferences = getApplicationContext().getSharedPreferences("login", Context.MODE_PRIVATE);
                 editor = preferences.edit();
+                editor.putString("id",Response);
                 editor.putString("time", (c.getTime().getHours() > 12 ? (c.getTime().getHours() - 12) : (c.getTime().getHours())) + "/" + c.getTime().getMinutes());
                 editor.apply();
                 connectToApi();
