@@ -294,12 +294,16 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 userId.requestFocus();
                 Response = "";
             } else {
+                String id = Response.substring(0,Response.indexOf(","));
+                String admin_id = Response.substring(Response.indexOf(",")+1);
+                Log.d("ids",id+" "+admin_id);
                 progressDialog.dismiss();
                 changeView("logout");
                 Calendar c = Calendar.getInstance();
                 preferences = getApplicationContext().getSharedPreferences("login", Context.MODE_PRIVATE);
                 editor = preferences.edit();
-                editor.putString("id",Response);
+                editor.putString("id",id);
+                editor.putString("admin_id",admin_id);
                 editor.putString("time", (c.getTime().getHours() > 12 ? (c.getTime().getHours() - 12) : (c.getTime().getHours())) + "/" + c.getTime().getMinutes());
                 editor.apply();
                 connectToApi();
@@ -344,6 +348,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             }
             mBufferedInputStream.close();
             Log.d("response", Response);
+
+
 
         } catch (MalformedURLException e) {
             e.printStackTrace();

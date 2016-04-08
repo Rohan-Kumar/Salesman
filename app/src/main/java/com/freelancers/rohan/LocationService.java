@@ -104,7 +104,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             public void run() {
                 Log.d("json array", "" + jsonArray);
                 sharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES, MODE_PRIVATE);
-                sendLoc(loc, sharedPreferences.getString(Constants.EMP_ID_PREf, getApplicationContext().getSharedPreferences("login", Context.MODE_PRIVATE).getString("id","0")));
+                sendLoc(loc, sharedPreferences.getString(Constants.EMP_ID_PREf, getApplicationContext().getSharedPreferences("login", Context.MODE_PRIVATE).getString("id","0")),sharedPreferences.getString(Constants.EMP_ID_PREf, getApplicationContext().getSharedPreferences("login", Context.MODE_PRIVATE).getString("admin_id","0")));
                 Log.d("json array", "" + jsonArray);
             }
         }, 1000, 30000);
@@ -112,7 +112,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     }
 
 
-    public void sendLoc(final Location location, final String salesman_id) {
+    public void sendLoc(final Location location, final String salesman_id, final String admin_id) {
 
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -135,7 +135,8 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
                     Uri.Builder builder = new Uri.Builder()
                             .appendQueryParameter("array", "" + jsonArray)
-                            .appendQueryParameter("salesman_id", salesman_id);
+                            .appendQueryParameter("salesman_id", salesman_id)
+                            .appendQueryParameter("admin_id", admin_id);
 
 
                     String query = builder.build().getEncodedQuery();
