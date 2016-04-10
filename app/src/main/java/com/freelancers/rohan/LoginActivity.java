@@ -50,7 +50,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     AutoCompleteTextView userId;
     EditText password;
     TextView status;
-    Button signInButton, signOutButton;
+    Button signInButton, signOutButton,order;
     String Response = "";
     SharedPreferences preferences;
     SharedPreferences.Editor editor;
@@ -72,6 +72,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         password = (EditText) findViewById(R.id.password);
         signInButton = (Button) findViewById(R.id.email_sign_in_button);
         signOutButton = (Button) findViewById(R.id.email_sign_out_button);
+        order = (Button) findViewById(R.id.order);
         status = (TextView) findViewById(R.id.status);
 
         preferences = getSharedPreferences("login", Context.MODE_PRIVATE);
@@ -110,6 +111,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             password.setVisibility(View.GONE);
             signInButton.setVisibility(View.INVISIBLE);
             signOutButton.setVisibility(View.VISIBLE);
+            order.setVisibility(View.VISIBLE);
             status.setVisibility(View.VISIBLE);
             if (!isSet)
                 status.setText(preferences.getString("time", "").equals("") ? "Error" : "Your last login was at " + preferences.getString("time", ""));
@@ -121,6 +123,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             password.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.VISIBLE);
             signOutButton.setVisibility(View.INVISIBLE);
+            order.setVisibility(View.INVISIBLE);
             status.setVisibility(View.INVISIBLE);
             editor.putString("status", "login");
 //            connectToApi();
@@ -246,6 +249,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 changeView("login");
             }
         }
+    }
+
+    public void order(View view) {
+        startActivity(new Intent(LoginActivity.this,OrderActivity.class));
     }
 
     /**

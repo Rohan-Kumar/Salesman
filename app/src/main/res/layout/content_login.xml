@@ -75,6 +75,16 @@
             android:text="Logout"
             android:textStyle="bold" />
 
+        <Button
+            android:id="@+id/order"
+            style="?android:textAppearanceSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:onClick="order"
+            android:text="Order"
+            android:textStyle="bold" />
+
     </LinearLayout>
 
 </LinearLayout>
