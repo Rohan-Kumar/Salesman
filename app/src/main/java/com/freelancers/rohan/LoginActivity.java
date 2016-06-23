@@ -325,7 +325,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     public void authenticate(String userid, String password) {
         URL url;
         try {
-            url = new URL("http://204.152.203.111/salesman/salesman_login.php");
+            url = new URL(Constants.URL+"salesman_login.php");
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 
             httpURLConnection.setDoInput(true);

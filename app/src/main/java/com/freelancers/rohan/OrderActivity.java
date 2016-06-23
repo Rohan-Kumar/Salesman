@@ -180,7 +180,7 @@ public class OrderActivity extends AppCompatActivity {
             URL url;
             try {
 
-                url = new URL("http://204.152.203.111/salesman/insert_product.php");
+                url = new URL(Constants.URL+"insert_product.php");
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 
                 httpURLConnection.setDoInput(true);
